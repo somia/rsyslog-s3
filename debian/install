@@ -1,3 +1,5 @@
 debian/60-s3.conf etc/rsyslog.d
+debian/rsyslog-s3-cat usr/bin
 debian/rsyslog-s3-omprog usr/bin
+rsyslog-s3-cat.py usr/lib
 rsyslog-s3-omprog.py usr/lib

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+[ -r /etc/default/rsyslog-s3 ] && . /etc/default/rsyslog-s3
+
+export S3_SYSLOG_ACCESS_KEY
+export S3_SYSLOG_SECRET_KEY
+export S3_SYSLOG_BUCKET
+
+if [ "$S3_SYSLOG_KEY_FORMAT" ]
+then export S3_SYSLOG_KEY_FORMAT
+fi
+
+exec ${PYTHON:-python} -u /usr/lib/rsyslog-s3-cat.py "$@"
