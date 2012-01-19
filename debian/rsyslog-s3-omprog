@@ -1,0 +1,10 @@
+#!/bin/sh
+
+[ -r /etc/default/rsyslog-s3 ] && . /etc/default/rsyslog-s3
+
+export S3_ACCESS_KEY
+export S3_SECRET_KEY
+export S3_BUCKET
+export S3_PATH_FORMAT
+
+exec ${PYTHON:-python} -u /usr/lib/rsyslog-s3-omprog.py

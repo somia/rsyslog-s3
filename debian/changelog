@@ -1,0 +1,5 @@
+rsyslog-s3 (0.0) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Timo Savola <timo.savola@somia.fi>  Thu, 19 Jan 2012 12:52:51 +0200

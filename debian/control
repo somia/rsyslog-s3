@@ -1,0 +1,11 @@
+Source: rsyslog-s3
+Section: admin
+Priority: extra
+Maintainer: Timo Savola <timo.savola@somia.fi>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+
+Package: rsyslog-s3
+Architecture: all
+Depends: python (>= 2.7), python-boto, rsyslog (>= 4.3)
+Description: archive rsyslog output to Amazon S3

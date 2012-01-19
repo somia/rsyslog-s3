@@ -1,0 +1,5 @@
+#!/usr/bin/make -f
+
+%:
+	cp LICENSE debian/copyright
+	dh $@
