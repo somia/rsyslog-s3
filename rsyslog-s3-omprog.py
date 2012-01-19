@@ -1,7 +1,8 @@
 #!/usr/bin/python -u
 
-import os
 import Queue as queuelib
+import argparse
+import os
 import socket
 import sys
 import threading
@@ -10,10 +11,18 @@ import time
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
+default_delay = 10 * 60
+default_lines = 10000
+
 def main():
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--delay", type=int, default=default_delay, help="in seconds")
+	parser.add_argument("--lines", type=int, default=default_lines)
+	args = parser.parse_args()
+
 	queue = queuelib.Queue(1)
 	receive = Receive(queue)
-	storage = Storage(queue)
+	storage = Storage(queue, args.delay, args.lines)
 
 	thread = threading.Thread(target=receive.loop)
 	thread.daemon = True
@@ -39,16 +48,18 @@ class Receive(object):
 
 class Storage(object):
 
-	max_delay = 10 * 60
-	max_lines = 10000
+	key_format = "host/%Y-%m-%d/{hostname}/%H:%M:%S"
 
-	default_path_format = "host/%Y-%m-%d/{hostname}/%H:%M:%S"
+	def __init__(self, queue, max_delay, max_lines):
+		conn = S3Connection(os.environ["S3_SYSLOG_ACCESS_KEY"], os.environ["S3_SYSLOG_SECRET_KEY"])
+		self.bucket = conn.get_bucket(os.environ["S3_SYSLOG_BUCKET"])
 
-	def __init__(self, queue):
-		conn = S3Connection(os.environ["S3_ACCESS_KEY"], os.environ["S3_SECRET_KEY"])
-		self.bucket = conn.get_bucket(os.environ["S3_BUCKET"])
-		self.path_format = os.environ.get("S3_PATH_FORMAT", self.default_path_format)
-		self.params = dict(hostname=socket.gethostname())
+		self.key_format = os.environ.get("S3_SYSLOG_KEY_FORMAT", self.key_format)
+		self.key_params = dict(hostname=socket.gethostname())
+
+		self.max_delay = max_delay
+		self.max_lines = max_lines
+
 		self.queue = queue
 
 	def loop(self):
@@ -86,7 +97,7 @@ class Storage(object):
 			return
 
 		key = Key(self.bucket)
-		key.key = time.strftime(self.path_format).format(**self.params)
+		key.key = time.strftime(self.key_format).format(**self.key_params)
 		key.set_contents_from_string("".join(log))
 
 		del log[:]
