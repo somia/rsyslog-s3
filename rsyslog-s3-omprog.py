@@ -49,6 +49,7 @@ class Receive(object):
 class Storage(object):
 
 	key_format = "host/%Y-%m-%d/{hostname}/%H:%M:%S"
+	key_headers = { "Content-Type": "text/plain" }
 
 	def __init__(self, queue, max_delay, max_lines):
 		conn = S3Connection(os.environ["S3_SYSLOG_ACCESS_KEY"], os.environ["S3_SYSLOG_SECRET_KEY"])
@@ -98,7 +99,7 @@ class Storage(object):
 
 		key = Key(self.bucket)
 		key.key = time.strftime(self.key_format).format(**self.key_params)
-		key.set_contents_from_string("".join(log))
+		key.set_contents_from_string("".join(log), self.key_headers)
 
 		del log[:]
 
